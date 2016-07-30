@@ -1,0 +1,6 @@
+framework module SwiftDep {
+  umbrella header "SwiftDep-umbrella.h"
+
+  export *
+  module * { export * }
+}
