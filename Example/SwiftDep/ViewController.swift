@@ -22,6 +22,11 @@ class ViewController: UIViewController {
 			"E F",
 			"F H",
 		])
+		SwiftDep.test([
+			"A B",
+			"B C",
+			"C A",
+		])
     }
 
     override func didReceiveMemoryWarning() {

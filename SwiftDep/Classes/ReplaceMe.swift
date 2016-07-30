@@ -20,19 +20,49 @@ public class SwiftDep {
 				}
 			}
 		}
+		var keys = [String]()
 		for (key, value) in dict {
-			resolve(key, value, &dict)
+			keys.append(key)
+			//resolve(key, value, &dict)
+			//resolve(key, value, dict)
+		}
+		for i in 1 ..< keys.count {
+			resolve(keys[i], dict[keys[i]]!, &dict)
 		}
 		print(dict)
 	}
 	class func resolve(key: String, _ value: [String], inout _ dict: [String: [String]]) {
 		print("resolving \(key), \(value)")
+		var v = value
 		for s in value {
-			print("\(s), \(dict[s])")
+			if dict[s] != nil {
+				for s in dict[s]! {
+					v.append(s)
+				}
+			}
+		}
+		//v.remove_duplicate()
+		v = Array(Set(v))
+		//print("TODO: remove duplicate \(v)")
+		//print("updated value \(v)")
+		dict[key] = v
+		for (k1, v1) in dict {
+			if v1.contains(key) {
+				dict[k1]! += v
+				//print("TODO: append \(k1) with \(v)")
+				//dict[k1].remove_duplicate()
+				dict[k1] = Array(Set(dict[k1]!))
+				//print("TODO: remove duplicate \(dict[k1])")
+			}
+		}
+		/*
+		for s in value {
+			//print("\(s), \(dict[s])")
 			if let d = dict[s] {
-				resolve(s, d, &dict)
+				resolve(s, d, dict)
 			} else {
 			}
 		}
+		*/
 	}
 }
