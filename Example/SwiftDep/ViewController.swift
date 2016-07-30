@@ -7,12 +7,21 @@
 //
 
 import UIKit
+import SwiftDep
 
 class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+		SwiftDep.test([
+			"A B C",
+			"B C E",
+			"C G",
+			"D A F",
+			"E F",
+			"F H",
+		])
     }
 
     override func didReceiveMemoryWarning() {
@@ -21,4 +30,3 @@ class ViewController: UIViewController {
     }
 
 }
-
