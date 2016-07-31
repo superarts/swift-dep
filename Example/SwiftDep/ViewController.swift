@@ -27,6 +27,11 @@ class ViewController: UIViewController {
 			"B C",
 			"C A",
 		]))
+
+		let sd = SwiftDep()
+		sd.addDependency("A", ["B", "C"])
+		sd.addDependency("B", ["C", "E"])
+		print(sd.all)
     }
 
     override func didReceiveMemoryWarning() {

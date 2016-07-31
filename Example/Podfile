@@ -9,4 +9,5 @@ target 'SwiftDep_Example' do
     pod 'Quick', '~> 0.8'
   pod 'Nimble', '~> 3.0'
   end
+
 end

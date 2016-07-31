@@ -6,45 +6,145 @@ import SwiftDep
 
 class TableOfContentsSpec: QuickSpec {
     override func spec() {
-        describe("these will fail") {
+		describe("SwiftDep") {
+            it("can add dependency") {
+				let sd = SwiftDep()
+				sd.addDependency("A", ["B", "C"])
+				sd.addDependency("B", ["C", "E"])
 
-            it("can do maths") {
-                expect(1) == 2
+                expect(sd.all["A"]) == ["B", "C", "E"]
+                expect(sd.all["B"]) == ["C", "E"]
             }
+            context("reset dependency batch") {
+				let sd = SwiftDep()
+				it("can set dependency batch") {
+					sd.setDependencyBatch(["A": ["B", "C"], "B": ["C", "E"]])
 
-            it("can read") {
-                expect("number") == "string"
-            }
+					expect(sd.all["A"]) == ["B", "C", "E"]
+					expect(sd.all["B"]) == ["C", "E"]
+				}
+				it("can set dependency batch in a different way") {
+					let dict = SDHelper.arrayToDictionary([["D", "E", "F"], ["E", "F", "G"]])
+					sd.setDependencyBatch(dict)
 
-            it("will eventually fail") {
-                expect("time").toEventually( equal("done") )
-            }
-            
-            context("these will pass") {
+					expect(sd.all["D"]) == ["E", "F", "G"]
+					expect(sd.all["E"]) == ["F", "G"]
+				}
+				it("can set dependency batch and get result in the requested format") {
+					let dict = SDHelper.stringToDictionary([
+						"A B C",
+						"B C E",
+						"C G",
+						"D A F",
+						"E F",
+						"F H",
+					])
+					sd.setDependencyBatch(dict)
 
-                it("can do maths") {
-                    expect(23) == 23
-                }
+					let result = SDHelper.dictionaryToKeyValue(sd.all)
+					expect(result["A"]) == "B C E F G H"
+					expect(result["B"]) == "C E F G H"
+					expect(result["C"]) == "G"
+					expect(result["D"]) == "A B C E F G H"
+					expect(result["E"]) == "F H"
+					expect(result["F"]) == "H"
+				}
+			}
+            context("dependency conflict") {
+				it("allows dependency conflict by default") {
+					let sd = SwiftDep()
+					sd.addDependency("A", ["B"])
+					sd.addDependency("B", ["C"])
+					sd.addDependency("C", ["A"])
 
-                it("can read") {
-                    expect("🐮") == "🐮"
-                }
+					expect(sd.all["A"]) == ["A", "B", "C"]
+					expect(sd.all["B"]) == ["A", "B", "C"]
+					expect(sd.all["C"]) == ["A", "B", "C"]
+				}
+				context("can disallows dependency conflict") {
+					let sd = SwiftDep()
+					sd.allowsConflict = false
+					//	When addDependency() is called, item cannot be added if
+					//	there's a conflict and it's not allowed
+					it("makes addDependency() returns false if there's a conflict and it's not allowed") {
+						expect(sd.addDependency("A", ["B"])).to(beTrue())
+						expect(sd.addDependency("B", ["C"])).to(beTrue())
+						expect(sd.addDependency("C", ["A"])).to(beFalse())
 
-                it("will eventually pass") {
-                    var time = "passing"
-
-                    dispatch_async(dispatch_get_main_queue()) {
-                        time = "done"
-                    }
-
-                    waitUntil { done in
-                        NSThread.sleepForTimeInterval(0.5)
-                        expect(time) == "done"
-
-                        done()
-                    }
-                }
-            }
-        }
+						expect(sd.all["A"]) == ["B", "C"]
+						expect(sd.all["B"]) == ["C"]
+						expect(sd.all["C"]).to(beNil())
+					}
+					//	When setDependencyBatch() is called, it's guaranteed
+					//	that input dictionary will be set. If there's a
+					//	conflict, following dependency calculation will fail
+					it("makes setDependencyBatch() returns false if there's one or more conflict and it's not allowed") {
+						expect(sd.setDependencyBatch(["A": ["B"], "B": ["C"], "C": ["A"]])).to(beFalse())
+						print("However, since Dictionary is not ordered, result cannot be predicted: \(sd.all)")
+						print("TODO: if it's going to be a concern, Array [[Key: Value], ...] should be used instead of Dictionary [Key: Value, ...] as input format")
+					}
+				}
+			}
+			context("performance") {
+				it("is slow when dependency is depth") {
+					let sd = SwiftDep()
+					sd.order = .Append
+					print("began: \(NSDate())")
+					let count = 100
+					for i in 0 ..< count {
+						let s1 = String(format: "%09i", i)
+						let s2 = String(format: "%09i", i + 1)
+						sd.addDependency(s1, [s2])
+					}
+					expect(sd.all["000000000"]?.count) == count
+					print("ended: \(NSDate())")
+				}
+				it("is a bit faster when dependency is not deep") {
+					let sd = SwiftDep()
+					sd.order = .Append
+					print("began: \(NSDate())")
+					let count = 1000
+					for i in 0 ..< count {
+						let s1 = String(format: "%09i", i)
+						let s2 = "x"
+						sd.addDependency(s1, [s2])
+					}
+					expect(sd.all["000000000"]?.count) == 1
+					print("ended: \(NSDate())")
+				}
+			}
+            context("order") {
+				it("can append dependency") {
+					let sd = SwiftDep()
+					sd.order = .Append
+					sd.addDependency("A", ["D", "C"])
+					sd.addDependency("D", ["E", "F"])
+					expect(sd.all["A"]) == ["D", "C", "E", "F"]
+				}
+				it("can insert dependency") {
+					let sd = SwiftDep()
+					sd.order = .Insert
+					sd.addDependency("A", ["D", "C"])
+					sd.addDependency("D", ["E", "F"])
+					expect(sd.all["A"]) == ["D", "E", "F", "C"]
+				}
+				it("can order dependency ascendingly by default, which is slow") {
+					let sd = SwiftDep()
+					sd.addDependency("A", ["D", "C"])
+					sd.addDependency("D", ["E", "F"])
+					expect(sd.all["A"]) == ["C", "D", "E", "F"]
+				}
+				it("can also order dependency descendingly") {
+					let sd = SwiftDep()
+					sd.order = .Descending
+					sd.addDependency("A", ["D", "C"])
+					sd.addDependency("D", ["E", "F"])
+					expect(sd.all["A"]) == ["F", "E", "D", "C"]
+				}
+			}
+			it("can use another data source") {
+				//	TODO: implement other data sources
+			}
+		}
     }
 }
