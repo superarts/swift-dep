@@ -10,6 +10,8 @@ This pod is not published yet. To debug, add this line in your `Podfile`:
 
 ## Example & Test
 
+Instead of installing the `pod` in your project, probably you'd like to take a look at the `Tests` in `Example`:
+
 - `git clone git@github.com:superarts/swift-dep.git`
 - `cd swift-dep/Example`
 - `open SwiftDep.xcworkspace`
@@ -107,13 +109,13 @@ Such behavior can be changed by setting `sd.allowsConflict = false`, and in this
 ### About Result Order
 
 ```
-public enum SDAddOrder: String {
-	case Append
-	case Insert
-	case Ascending
-	case Descending
-	//	TODO: add custom sort
-}
+	public enum SDAddOrder: String {
+		case Append
+		case Insert
+		case Ascending
+		case Descending
+		//	TODO: add custom sort
+	}
 ```
 
 `order` can be set to `.Append` to append new dependencies to the old dependency list, you can think it works in a way that all the new dependencies come last (it's also faster):
