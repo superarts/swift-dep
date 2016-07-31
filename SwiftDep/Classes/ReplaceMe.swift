@@ -1,14 +1,26 @@
 // import Foundation
 
 public class SwiftDep {
-	//	format: ["A B C", "B C E", ...]
-	public class func test(array: [String]) {
+	public class func test(array: [String]) -> [String: [String]] {
+		let a1 = strToArray(array)
+		var dict = arrayToDictionary(a1)
+		addDependencyBatch(&dict)
+		return dict
+	}
+	//	in:		["A B C", "B C E", ...]
+	//	out:	[[A, B, C], [B, C, E], ...]
+	public class func strToArray(array: [String]) -> [[String]] {
 		var items = [[String]]()
-		var dict = [String: [String]]()
 		for s in array {
 			items.append(s.componentsSeparatedByString(" "))
 		}
-		print(items)
+		print("strToArray: \(items)")
+		return items
+	}
+	//	in:		[[A, B, C], [B, C, E], ...]
+	//	out:	["B": ["C", "E"], "A": ["B", "C"], ...]
+	public class func arrayToDictionary(items: [[String]]) -> [String: [String]] {
+		var dict = [String: [String]]()
 		for item in items {
 			for s in item {
 				if dict[s] == nil && item[0] == s {
@@ -20,19 +32,24 @@ public class SwiftDep {
 				}
 			}
 		}
+		print("arrayToDictionary: \(dict)")
+		return dict
+	}
+	//	in:		["B": ["C", "E"], "A": ["B", "C"], ...]
+	//	out:	resolved result
+	public class func addDependencyBatch(inout dict: [String: [String]]) -> [String: [String]] {
 		var keys = [String]()
 		for (key, value) in dict {
 			keys.append(key)
-			//resolve(key, value, &dict)
-			//resolve(key, value, dict)
 		}
 		for i in 1 ..< keys.count {
-			resolve(keys[i], dict[keys[i]]!, &dict)
+			addDependency(keys[i], dict[keys[i]]!, &dict)
+			print("adding dependency \(keys[i]): \(dict[keys[i]]!)")
 		}
-		print(dict)
+		return dict
 	}
-	class func resolve(key: String, _ value: [String], inout _ dict: [String: [String]]) {
-		print("resolving \(key), \(value)")
+	//	add dependency [A: [B, C]] to dataSource
+	class func addDependency(key: String, _ value: [String], inout _ dict: [String: [String]]) {
 		var v = value
 		for s in value {
 			if dict[s] != nil {
@@ -41,28 +58,13 @@ public class SwiftDep {
 				}
 			}
 		}
-		//v.remove_duplicate()
 		v = Array(Set(v))
-		//print("TODO: remove duplicate \(v)")
-		//print("updated value \(v)")
 		dict[key] = v
 		for (k1, v1) in dict {
 			if v1.contains(key) {
 				dict[k1]! += v
-				//print("TODO: append \(k1) with \(v)")
-				//dict[k1].remove_duplicate()
 				dict[k1] = Array(Set(dict[k1]!))
-				//print("TODO: remove duplicate \(dict[k1])")
 			}
 		}
-		/*
-		for s in value {
-			//print("\(s), \(dict[s])")
-			if let d = dict[s] {
-				resolve(s, d, dict)
-			} else {
-			}
-		}
-		*/
 	}
 }
