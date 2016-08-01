@@ -32,7 +32,23 @@ class ViewController: UIViewController {
 		sd.addDependency("A", ["B", "C"])
 		sd.addDependency("B", ["C", "E"])
 		print(sd.all)
+
+		print("began: \(NSDate())")
+		var array1 = ["test1"]
+		let array2 = ["test2"]
+		for _ in 0 ..< 1000000 {
+			array1 += array2
+		}
+		print("ended: \(NSDate()), \(array1.count)")
+
+		print("began: \(NSDate())")
+		for s in array1 {
+			doNothing(s)
+		}
+		print("ended: \(NSDate()), \(array1.count)")
     }
+	func doNothing(s: String) {
+	}
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
