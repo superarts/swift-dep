@@ -110,15 +110,6 @@ class TableOfContentsSpec: QuickSpec {
 					sd.addDependency("D", ["E", "F"])
 					expect(sd.all["A"]) == ["D", "C", "E", "F"]
 				}
-				/*
-				it("can insert dependency") {
-					let sd = SwiftDep()
-					sd.order = .Insert
-					sd.addDependency("A", ["D", "C"])
-					sd.addDependency("D", ["E", "F"])
-					expect(sd.all["A"]) == ["D", "E", "F", "C"]
-				}
-				*/
 				it("can order dependency ascendingly by default, which is slow") {
 					let sd = SwiftDep()
 					sd.addDependency("A", ["D", "C"])

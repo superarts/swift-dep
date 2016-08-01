@@ -2,7 +2,6 @@ public enum SDAddOrder: String {
 	case Append
 	case Ascending
 	case Descending
-	//case Insert
 	//	TODO: add custom sort
 }
 

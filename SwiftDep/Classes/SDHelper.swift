@@ -14,13 +14,6 @@ public struct SDHelper {
 		return buffer
 	}
 	static func addAndSort(inout array: [String], withArray anotherArray: [String], order: SDAddOrder) {
-		/*
-		if order == .Insert {
-			array.insertContentsOf(anotherArray, at: index)
-		} else {
-			array += anotherArray
-		}
-		*/
 		array += anotherArray
 		if order == .Ascending {
 			array = array.sort {
