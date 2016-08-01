@@ -51,19 +51,8 @@ class TableOfContentsSpec: QuickSpec {
 				}
 			}
             context("dependency conflict") {
-				it("allows dependency conflict by default") {
-					let sd = SwiftDep()
-					sd.addDependency("A", ["B"])
-					sd.addDependency("B", ["C"])
-					sd.addDependency("C", ["A"])
-
-					expect(sd.all["A"]) == ["A", "B", "C"]
-					expect(sd.all["B"]) == ["A", "B", "C"]
-					expect(sd.all["C"]) == ["A", "B", "C"]
-				}
 				context("can disallows dependency conflict") {
 					let sd = SwiftDep()
-					sd.allowsConflict = false
 					//	When addDependency() is called, item cannot be added if
 					//	there's a conflict and it's not allowed
 					it("makes addDependency() returns false if there's a conflict and it's not allowed") {
@@ -90,7 +79,7 @@ class TableOfContentsSpec: QuickSpec {
 					let sd = SwiftDep()
 					sd.order = .Append
 					print("began: \(NSDate())")
-					let count = 150
+					let count = 200
 					for i in 0 ..< count {
 						let s1 = String(format: "%09i", i)
 						let s2 = String(format: "%09i", i + 1)
@@ -103,7 +92,7 @@ class TableOfContentsSpec: QuickSpec {
 					let sd = SwiftDep()
 					sd.order = .Append
 					print("began: \(NSDate())")
-					let count = 3000
+					let count = 30000
 					for i in 0 ..< count {
 						let s1 = String(format: "%09i", i)
 						let s2 = "x"
@@ -121,6 +110,7 @@ class TableOfContentsSpec: QuickSpec {
 					sd.addDependency("D", ["E", "F"])
 					expect(sd.all["A"]) == ["D", "C", "E", "F"]
 				}
+				/*
 				it("can insert dependency") {
 					let sd = SwiftDep()
 					sd.order = .Insert
@@ -128,6 +118,7 @@ class TableOfContentsSpec: QuickSpec {
 					sd.addDependency("D", ["E", "F"])
 					expect(sd.all["A"]) == ["D", "E", "F", "C"]
 				}
+				*/
 				it("can order dependency ascendingly by default, which is slow") {
 					let sd = SwiftDep()
 					sd.addDependency("A", ["D", "C"])

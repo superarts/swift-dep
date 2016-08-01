@@ -1,15 +1,14 @@
 public enum SDAddOrder: String {
 	case Append
-	case Insert
 	case Ascending
 	case Descending
+	//case Insert
 	//	TODO: add custom sort
 }
 
 public class SwiftDep {
 	public var dataSource: SDDataSource!
 	public var order = SDAddOrder.Ascending
-	public var allowsConflict = true
 
 	public convenience init () {
 		self.init(dataSource: SDDefaultDataSource())
@@ -40,23 +39,21 @@ public class SwiftDep {
 	public func addDependency(key: String, _ value: [String]) -> Bool {
 		//	add dependency to the new item
 		var v = value
-		for i in 0 ..< value.count {
-			let k = value[i]
+		for k in value {
 			if let dependency = dataSource[k] {
-				SDHelper.addAndSort(&v, withArray: dependency, index: i + 1, order: order)
+				SDHelper.addAndSort(&v, withArray: dependency, order: order)
 			}
 		}
-		if !allowsConflict {
-			if v.contains(key) {
-				//print("conflict \(key): \(v)")
-				return false
-			}
+		if v.contains(key) {
+			//print("conflict \(key): \(v)")
+			return false
 		}
 		v = SDHelper.unique(v)
 		//	add the new item to dataSource
 		dataSource[key] = v
 		//	update exising items in dataSource
-		return dataSource.update(key, array: v, order: order, allowsConflict: allowsConflict)
+		dataSource.update(key, array: v, order: order)
+		return true
 	}
 	public var all: [String: [String]] {
 		return dataSource.getAll()

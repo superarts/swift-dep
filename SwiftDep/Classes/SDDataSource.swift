@@ -5,9 +5,8 @@ public protocol SDDataSource {
 	func reset()
 	/**
 	 * Update all dependencies with [key: array] 
-	 * Returns false if there's a conflict and it's not allowed
 	 */
-	func update(key: String, array: [String], order: SDAddOrder, allowsConflict: Bool) -> Bool
+	func update(key: String, array: [String], order: SDAddOrder)
 	/**
 	 * Get all dependencies
 	 */
@@ -34,7 +33,7 @@ extension SDDataSource {
 /**
  * The default SwiftDep dataSource
  */
-typealias SDDefaultDataSource = SDSmallDataSource
+typealias SDDefaultDataSource = SDFastDataSource
 
 /**
  * A simple dataSource, which is based on a native Dictionary.
@@ -51,19 +50,13 @@ public class SDSmallDataSource: SDDataSource {
 	public func set(key: String, array: [String]?) {
 		dict[key] = array
 	}
-	public func update(key: String, array: [String], order: SDAddOrder, allowsConflict: Bool) -> Bool {
+	public func update(key: String, array: [String], order: SDAddOrder) {
 		for (k, v) in dict {
-			if let index = v.indexOf(key) {
-				if !allowsConflict {
-					if array.contains(k) {
-						return false
-					}
-				}
-				SDHelper.addAndSort(&dict[k]!, withArray: array, index: index + 1, order: order)
+			if let _ = v.indexOf(key) {
+				SDHelper.addAndSort(&dict[k]!, withArray: array, order: order)
 				dict[k] = SDHelper.unique(dict[k]!)
 			}
 		}
-		return true
 	}
 	public func getAll() -> [String: [String]] {
 		return dict
@@ -92,19 +85,14 @@ public class SDFastDataSource: SDSmallDataSource {
 			}
 		}
 	}
-	public override func update(key: String, array: [String], order: SDAddOrder, allowsConflict: Bool) -> Bool {
+	public override func update(key: String, array: [String], order: SDAddOrder) {
 		if let keys = parent[key] {
 			for k in keys {
-				if !allowsConflict {
-					if array.contains(k) {
-						return false
-					}
-				}
-				SDHelper.addAndSort(&dict[k]!, withArray: array, index: 0, order: order)
+				SDHelper.addAndSort(&dict[k]!, withArray: array, order: order)
 				dict[k] = SDHelper.unique(dict[k]!)
+				update(k, array: array, order: order)
 			}
 		}
-		return true
 	}
 }
 
@@ -133,14 +121,13 @@ public class SDSqliteDataSource: SDDataSource {
 		 *	INSERT INTO Relationship (Key, Value) VALUES (key, value);
 		 */
 	}
-	public func update(key: String, array: [String], order: SDAddOrder, allowsConflict: Bool) -> Bool {
+	public func update(key: String, array: [String], order: SDAddOrder) {
 		/*
 		 * keys = SELECT Key FROM Relationship WHERE Value = key;
 		 * FOREACH aKey IN keys
 		 *	FOREACH aValue IN array
 		 *	 INSERT INTO Relationship (Key, Value) VALUES (aKey, aValue);
 		 */
-		return false
 	}
 	public func getAll() -> [String: [String]] {
 		/* 
