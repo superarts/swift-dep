@@ -23,20 +23,14 @@ public class SwiftDep {
 	 * Returns false if there's one or more conflict and it's not allowed
 	 */
 	public func setDependencyBatch(dict: [String: [String]]) -> Bool {
-		dataSource.reset(dict)
+		dataSource.reset()
 
 		var ret = true
-		var keys = [String]()
 		for (key, value) in dict {
-			keys.append(key)
-		}
-		for i in 1 ..< keys.count {
-			//print("adding dependency \(keys[i]): \(dict[keys[i]]!) - \(all)")
-			if !addDependency(keys[i], dict[keys[i]]!) {
+			if !addDependency(key, value) {
 				ret = false
 			}
 		}
-		//print("setDependencyBatch: \(dataSource.getAll())")
 		return ret
 	}
 	/**

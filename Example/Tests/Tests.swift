@@ -75,9 +75,9 @@ class TableOfContentsSpec: QuickSpec {
 						expect(sd.all["B"]) == ["C"]
 						expect(sd.all["C"]).to(beNil())
 					}
-					//	When setDependencyBatch() is called, it's guaranteed
-					//	that input dictionary will be set. If there's a
-					//	conflict, following dependency calculation will fail
+					//	When setDependencyBatch() is called, items that cause
+					//	conflict cannot be added, and it returns false if
+					//	there's one or more conflict
 					it("makes setDependencyBatch() returns false if there's one or more conflict and it's not allowed") {
 						expect(sd.setDependencyBatch(["A": ["B"], "B": ["C"], "C": ["A"]])).to(beFalse())
 						print("However, since Dictionary is not ordered, result cannot be predicted: \(sd.all)")

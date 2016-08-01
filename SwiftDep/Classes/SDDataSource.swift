@@ -1,8 +1,8 @@
 public protocol SDDataSource {
 	/**
-	 * Initialize dataSource with `dict`. Pass `nil` to clear.
+	 * Clear dataSource
 	 */
-	func reset(dict: [String: [String]]?)
+	func reset()
 	/**
 	 * Update all dependencies with [key: array] 
 	 * Returns false if there's a conflict and it's not allowed
@@ -29,10 +29,6 @@ extension SDDataSource {
 			set(key, array: array)
 		}
 	}
-
-	public func clear() {
-		reset(nil)
-	}
 }
 
 /**
@@ -46,12 +42,8 @@ typealias SDDefaultDataSource = SDSmallDataSource
  */
 public class SDSmallDataSource: SDDataSource {
 	var dict = [String: [String]]()
-	public func reset(aDict: [String: [String]]?) {
-		if let d = aDict {
-			dict = d
-		} else {
-			dict.removeAll()
-		}
+	public func reset() {
+		dict.removeAll()
 	}
 	public func get(key: String) -> [String]? {
 		return dict[key]
@@ -83,6 +75,10 @@ public class SDSmallDataSource: SDDataSource {
  */
 public class SDFastDataSource: SDSmallDataSource {
 	var parent = [String: [String]]()
+	public override func reset() {
+		super.reset()
+		parent.removeAll()
+	}
 	public override func set(key: String, array: [String]?) {
 		super.set(key, array: array)
 		dict[key] = array
@@ -112,62 +108,12 @@ public class SDFastDataSource: SDSmallDataSource {
 	}
 }
 
-/*
-public class SDRelationalDataSource: SDDataSource {
-	var filename: String!
-	var kv = [String: String]()
-	var vk = [String: String]()
-	public func reset(dict: [String: [String]]?) {
-		if let d = dict {
-			//	TODO
-		} else {
-			kv.removeAll()
-			vk.removeAll()
-		}
-	}
-	public func get(key: String) -> [String]? {
-		/*
-		 * results = SELECT Value FROM Relationship WHERE Key = key;
-		 * return results
-		 */
-		return nil
-	}
-	public func set(key: String, array: [String]?) {
-		for value in array {
-			kv[key]
-		}
-		/*
-		 * FOREACH value IN array
-		 *	INSERT INTO Relationship (Key, Value) VALUES (key, value);
-		 */
-	}
-	public func update(key: String, array: [String], order: SDAddOrder, allowsConflict: Bool) -> Bool {
-		/*
-		 * keys = SELECT Key FROM Relationship WHERE Value = key;
-		 * FOREACH aKey IN keys
-		 *	FOREACH aValue IN array
-		 *	 INSERT INTO Relationship (Key, Value) VALUES (aKey, aValue);
-		 */
-		return false
-	}
-	public func getAll() -> [String: [String]] {
-		/* 
-		 * results = []
-		 * keys = SELECT keys FROM table
-		 * FOREACH key IN keys
-		 *	results.append(SELECT Value FROM Relationship where Key = key)
-		 */
-		return [String: [String]]()
-	}
-}
-*/
-
 /**
  * A pseudo-dataSource that is based on Sqlite.
  */
 public class SDSqliteDataSource: SDDataSource {
 	var filename: String!
-	public func reset(aDict: [String: [String]]?) {
+	public func reset() {
 		/*
 		 * delete_db
 		 * create_db
