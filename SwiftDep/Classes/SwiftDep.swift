@@ -55,6 +55,7 @@ public class SwiftDep {
 		return true
 	}
 	public var all: [String: [String]] {
+		dataSource.removeDuplicate()
 		return dataSource.getAll()
 	}
 
@@ -63,6 +64,6 @@ public class SwiftDep {
 		let sd = SwiftDep()
 		let dict = SDHelper.stringToDictionary(array)
 		sd.setDependencyBatch(dict)
-		return SDHelper.dictionaryToKeyValue(sd.dataSource.getAll())
+		return SDHelper.dictionaryToKeyValue(sd.all)
 	}
 }

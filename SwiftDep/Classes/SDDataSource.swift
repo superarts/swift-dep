@@ -8,6 +8,11 @@ public protocol SDDataSource {
 	 */
 	func update(key: String, array: [String], order: SDAddOrder)
 	/**
+	 * Duplicated items will be removed upon get().
+	 * This function can also be called to remove all duplicates.
+	 */
+	func removeDuplicate()
+	/**
 	 * Get all dependencies
 	 */
 	func getAll() -> [String: [String]]
@@ -33,7 +38,7 @@ extension SDDataSource {
 /**
  * The default SwiftDep dataSource
  */
-typealias SDDefaultDataSource = SDFastDataSource
+public typealias SDDefaultDataSource = SDFastDataSource
 
 /**
  * A simple dataSource, which is based on a native Dictionary.
@@ -45,7 +50,10 @@ public class SDSmallDataSource: SDDataSource {
 		dict.removeAll()
 	}
 	public func get(key: String) -> [String]? {
-		return dict[key]
+		if let array = dict[key] {
+			return SDHelper.unique(array)
+		}
+		return nil
 	}
 	public func set(key: String, array: [String]?) {
 		dict[key] = array
@@ -54,13 +62,20 @@ public class SDSmallDataSource: SDDataSource {
 		for (k, v) in dict {
 			if let _ = v.indexOf(key) {
 				SDHelper.addAndSort(&dict[k]!, withArray: array, order: order)
-				dict[k] = SDHelper.unique(dict[k]!)
 			}
 		}
+	}
+	public func removeDuplicate() {
+		var dictUnique = [String: [String]]()
+		for (key, value) in dict {
+			dictUnique[key] = SDHelper.unique(value)
+		}
+		dict = dictUnique
 	}
 	public func getAll() -> [String: [String]] {
 		return dict
 	}
+	public init() { }
 }
 
 /**
@@ -89,7 +104,6 @@ public class SDFastDataSource: SDSmallDataSource {
 		if let keys = parent[key] {
 			for k in keys {
 				SDHelper.addAndSort(&dict[k]!, withArray: array, order: order)
-				dict[k] = SDHelper.unique(dict[k]!)
 				update(k, array: array, order: order)
 			}
 		}
@@ -127,6 +141,11 @@ public class SDSqliteDataSource: SDDataSource {
 		 * FOREACH aKey IN keys
 		 *	FOREACH aValue IN array
 		 *	 INSERT INTO Relationship (Key, Value) VALUES (aKey, aValue);
+		 */
+	}
+	public func removeDuplicate() {
+		/*
+		 * db cleanup
 		 */
 	}
 	public func getAll() -> [String: [String]] {

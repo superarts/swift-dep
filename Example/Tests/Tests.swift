@@ -75,11 +75,11 @@ class TableOfContentsSpec: QuickSpec {
 				}
 			}
 			context("performance") {
-				it("is slow when dependency is depth") {
+				it("is slow when dependency is deep") {
 					let sd = SwiftDep()
 					sd.order = .Append
 					print("began: \(NSDate())")
-					let count = 200
+					let count = 500
 					for i in 0 ..< count {
 						let s1 = String(format: "%09i", i)
 						let s2 = String(format: "%09i", i + 1)
@@ -92,13 +92,26 @@ class TableOfContentsSpec: QuickSpec {
 					let sd = SwiftDep()
 					sd.order = .Append
 					print("began: \(NSDate())")
-					let count = 30000
+					let count = 10000
 					for i in 0 ..< count {
 						let s1 = String(format: "%09i", i)
 						let s2 = "x"
 						sd.addDependency(s1, [s2])
 					}
 					expect(sd.all["000000000"]?.count) == 1
+					print("ended: \(NSDate())")
+				}
+				it("is very slow when using SDSmallDataSource") {
+					let sd = SwiftDep(dataSource: SDSmallDataSource())
+					sd.order = .Append
+					print("began: \(NSDate())")
+					let count = 400
+					for i in 0 ..< count {
+						let s1 = String(format: "%09i", i)
+						let s2 = String(format: "%09i", i + 1)
+						sd.addDependency(s1, [s2])
+					}
+					expect(sd.all["000000000"]?.count) == count
 					print("ended: \(NSDate())")
 				}
 			}

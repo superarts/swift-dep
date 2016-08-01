@@ -1,7 +1,7 @@
 public struct SDHelper {
 	public static var inputSeparator = " "
 	public static var outputSeparator = " "
-	
+
 	static func unique<S : SequenceType, T : Hashable where S.Generator.Element == T>(source: S) -> [T] {
 		var buffer = [T]()
 			var added = Set<T>()
@@ -12,6 +12,9 @@ public struct SDHelper {
 				}
 			}
 		return buffer
+	}
+	static func uniqueArray(array: [String]) -> [String] {
+		return Array(Set(array))
 	}
 	static func addAndSort(inout array: [String], withArray anotherArray: [String], order: SDAddOrder) {
 		array += anotherArray
