@@ -90,7 +90,7 @@ class TableOfContentsSpec: QuickSpec {
 					let sd = SwiftDep()
 					sd.order = .Append
 					print("began: \(NSDate())")
-					let count = 100
+					let count = 150
 					for i in 0 ..< count {
 						let s1 = String(format: "%09i", i)
 						let s2 = String(format: "%09i", i + 1)
@@ -103,7 +103,7 @@ class TableOfContentsSpec: QuickSpec {
 					let sd = SwiftDep()
 					sd.order = .Append
 					print("began: \(NSDate())")
-					let count = 1000
+					let count = 3000
 					for i in 0 ..< count {
 						let s1 = String(format: "%09i", i)
 						let s2 = "x"
